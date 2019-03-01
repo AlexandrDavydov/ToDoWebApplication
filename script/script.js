@@ -1,30 +1,63 @@
 const az = true;
 const za = false;
 
-var saved_items = [];
-var titlesSortedOrder = az;
-var descriptionSortedOrder = az;
-var sortedByTitle = true;
+let saved_items = [];
+let titlesSortedOrder = az;
+let descriptionSortedOrder = az;
+let sortedByTitle = true;
+let settings = {};
 
 $(document).ready(function () {
     loadFromStorage();
     showLines();
-
 });
 
+function getSetting(){
+    let settings = [];
+    settings[0] = titlesSortedOrder;
+    settings[1] = descriptionSortedOrder;
+    settings[2] = sortedByTitle;
+    return settings;
+}
+
+function traceSettings(){
+    console.log("===============================");
+    console.log("titlesSortedOrder = "+titlesSortedOrder);
+    console.log("descriptionSortedOrder = "+descriptionSortedOrder);
+    console.log("sortedByTitle = "+sortedByTitle);
+}
+
+function setSetting(settings){
+    console.log("settings = "+settings);
+    titlesSortedOrder = settings[0];
+    descriptionSortedOrder = settings[1];
+    sortedByTitle = settings[2];
+    //traceSettings();
+}
+
 function loadFromStorage(){
-    console.log("localStorage.length = "+localStorage.length);
-    for(i=0; i<localStorage.length; i++){
+    console.log("localStorage = "+localStorage.length);
+    setSetting(localStorage.getItem(localStorage.key(localStorage.length-1)));
+
+    for(i=0; i<localStorage.length-1; i++){
         saved_items[i] = JSON.parse(localStorage.getItem(localStorage.key(i)));
-        console.log(saved_items[i])
+        //console.log("saved_items["+(i)+"] = "+saved_items[i].title);
     }
+
+    for(i=0; i<localStorage.length; i++){
+        console.log("localStorage["+i+"] = "+JSON.parse(localStorage.getItem(localStorage.key(i))));
+    }
+
 }
 
 function saveToStorage(){
     localStorage.clear();
+    localStorage.setItem("settings", JSON.stringify(getSetting()));
     for(i=0; i<saved_items.length; i++){
-        localStorage.setItem(i.toString(), JSON.stringify(saved_items[i]));
+        localStorage.setItem(i+1, JSON.stringify(saved_items[i]));
+        //console.log("localStorage["+(i+1)+"] = "+saved_items[i].title);
     }
+
 }
 
 function showLines(){
@@ -39,31 +72,31 @@ function showLines(){
 }
 
 function addLine(title, description, completed, selected){
-    var tableRef = document.getElementById('myTable');
-    var newRow   = tableRef.insertRow(tableRef.rows.length);
+    let tableRef = document.getElementById('myTable');
+    let newRow = tableRef.insertRow(tableRef.rows.length);
     newRow.className = "row";
 
-    var newCell  = newRow.insertCell(0);
-    var selectedCB  = document.createElement("input");
+    let newCell = newRow.insertCell(0);
+    let selectedCB = document.createElement("input");
     selectedCB.type = "checkbox";
     selectedCB.checked = selected;
     selectedCB.className = "selectedCH";
     newCell.appendChild(selectedCB);
 
-    var newCell  = newRow.insertCell(1);
-    var titleText  = document.createElement("input");
+    newCell = newRow.insertCell(1);
+    let titleText = document.createElement("input");
     titleText.value = title;
     titleText.className = "titleTF";
     newCell.appendChild(titleText);
 
-    var newCell  = newRow.insertCell(2);
-    var descriptionText  = document.createElement("input");
+    newCell = newRow.insertCell(2);
+    let descriptionText = document.createElement("input");
     descriptionText.value = description;
     descriptionText.className = "descriptionTF";
     newCell.appendChild(descriptionText);
 
-    var newCell  = newRow.insertCell(3);
-    var completeCB  = document.createElement("input");
+    newCell = newRow.insertCell(3);
+    let completeCB = document.createElement("input");
     completeCB.type = "checkbox";
     completeCB.checked = completed;
     completeCB.className = "completedCH";
@@ -77,7 +110,7 @@ $("#addNewTask").click(function(){
         title: "New task title",
         description: "New task description."
     };
-    saved_items = sorting(saved_items, titlesSortedOrder, true);
+    saved_items = sorting(saved_items, titlesSortedOrder);
     saveToStorage();
     showLines();
 });
@@ -129,7 +162,7 @@ $("#myTable").on('change', 'input',function(event){
 
 function saveData(){
     var selectedBoxes = $(".selectedCH");
-    console.log("selectedBoxes.length = "+selectedBoxes.length);
+    //console.log("selectedBoxes.length = "+selectedBoxes.length);
     var titles = $(".titleTF");
     var descriptions = $(".descriptionTF");
     var completedBoxes = $(".completedCH");
@@ -141,17 +174,18 @@ function saveData(){
         lineObj.selected = selectedBoxes[i].checked;
         saved_items[i] = lineObj;
 
-        console.log("lineObj.title = "+lineObj.title);
+        //console.log("lineObj.title = "+lineObj.title);
     }
     saveToStorage();
 }
 
-function sorting(arr, order, titleField){
+function sorting(arr, order){
+    traceSettings();
     var byName = arr.slice(0);
     byName.sort(function(a,b) {
         let y;
         let x;
-        if(titleField) {
+        if(sortedByTitle) {
             x = a.title.toLowerCase();
             y = b.title.toLowerCase();
         }else{
@@ -169,13 +203,15 @@ function sorting(arr, order, titleField){
 
 $("#sort1").on('click', function(){
     titlesSortedOrder = !titlesSortedOrder;
-    saved_items = sorting(saved_items, titlesSortedOrder, true);
+    sortedByTitle = true;
+    saved_items = sorting(saved_items, titlesSortedOrder);
     saveToStorage();
     showLines();
 });
 $("#sort2").on('click', function(){
     descriptionSortedOrder = !descriptionSortedOrder;
-    saved_items = sorting(saved_items, descriptionSortedOrder, false);
+    sortedByTitle = false;
+    saved_items = sorting(saved_items, descriptionSortedOrder);
     saveToStorage();
     showLines();
 });
