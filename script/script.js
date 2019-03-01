@@ -82,13 +82,17 @@ $("#addNewTask").click(function(){
     showLines();
 });
 
-$("#deleteNewTask").on('click', function(){
+$("#deleteTask").on('click', function(){
     var selectedBoxes = $(".selectedCH");
     var selected = [];
     for(var i=0; i<selectedBoxes.length; i++){
         if(selectedBoxes[i].checked === true){
             selected.push(i);
         }
+    }
+    if(selected.length === 0){
+        alert("Select items!");
+        return;
     }
     saved_items = removeSelectedFromArray(saved_items, selected);
     traceArray(saved_items);
