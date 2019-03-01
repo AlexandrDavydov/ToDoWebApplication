@@ -1,0 +1,30 @@
+.title{
+    width: 100%;
+    font-size: 24px;
+}
+table{
+    width: 100%;
+    border: 1px solid black;
+}
+th{
+    background-color: bisque;
+}
+td {
+    border-bottom: 1px solid lightgray;
+}
+
+input[checked]{
+    background-color: chartreuse;
+}
+
+.control{
+    padding: 10px;
+}
+.selectedCH{
+    align-content: center;
+}
+input{
+    width: 100%;
+    border: none;
+    background: transparent;
+}
