@@ -4,6 +4,7 @@ const za = false;
 let saved_items = [];
 let titlesSortedOrder = az;
 let descriptionSortedOrder = az;
+let sortMethod = az
 let sortedByTitle = true;
 let settings = {};
 
@@ -13,10 +14,11 @@ $(document).ready(function () {
 });
 
 function getSetting(){
-    let settings = [];
-    settings[0] = titlesSortedOrder;
-    settings[1] = descriptionSortedOrder;
-    settings[2] = sortedByTitle;
+    let settings = {};
+    settings.titlesSortedOrder = titlesSortedOrder;
+    settings.descriptionSortedOrder = descriptionSortedOrder;
+    settings.sortedByTitle = sortedByTitle;
+    settings.sortMethod = sortMethod;
     return settings;
 }
 
@@ -28,31 +30,35 @@ function traceSettings(){
 }
 
 function setSetting(settings){
-    console.log("settings = "+settings);
-    titlesSortedOrder = settings[0];
-    descriptionSortedOrder = settings[1];
-    sortedByTitle = settings[2];
-    //traceSettings();
+    console.log("titlesSortedOrder = "+settings.titlesSortedOrder);
+    console.log("descriptionSortedOrder = "+settings.descriptionSortedOrder);
+    console.log("sortedByTitle = "+settings.sortedByTitle);
+    console.log("sortMethod = "+settings.sortMethod);
+    titlesSortedOrder = settings.titlesSortedOrder;
+    descriptionSortedOrder = settings.descriptionSortedOrder;
+    sortedByTitle = settings.sortedByTitle;
+    sortMethod = settings.sortMethod;
 }
 
 function loadFromStorage(){
     console.log("localStorage = "+localStorage.length);
-    setSetting(localStorage.getItem(localStorage.key(localStorage.length-1)));
-
     for(i=0; i<localStorage.length-1; i++){
         saved_items[i] = JSON.parse(localStorage.getItem(localStorage.key(i)));
         //console.log("saved_items["+(i)+"] = "+saved_items[i].title);
     }
 
-    for(i=0; i<localStorage.length; i++){
-        console.log("localStorage["+i+"] = "+JSON.parse(localStorage.getItem(localStorage.key(i))));
+    for(i=0; i<localStorage.length-1; i++){
+        console.log("localStorage["+i+"] = "+JSON.parse(localStorage.getItem(localStorage.key(i))).title);
     }
-
+    setSetting(JSON.parse(localStorage.getItem(
+        localStorage.key(localStorage.length-1))));
 }
 
 function saveToStorage(){
     localStorage.clear();
+    console.log("settings = "+getSetting());
     localStorage.setItem("settings", JSON.stringify(getSetting()));
+    // console.log("settings = "+JSON.stringify(getSetting()));
     for(i=0; i<saved_items.length; i++){
         localStorage.setItem(i+1, JSON.stringify(saved_items[i]));
         //console.log("localStorage["+(i+1)+"] = "+saved_items[i].title);
@@ -158,6 +164,7 @@ function removeSelectedFromArray(all, selected){
 
 $("#myTable").on('change', 'input',function(event){
     saveData();
+
 });
 
 function saveData(){
@@ -178,7 +185,13 @@ function saveData(){
     }
     saveToStorage();
 }
-
+function markSorted(){
+    if(sortedByTitle){
+        $("#title").className("sort");
+    }else{
+        $("#description").className("sort");
+    }
+}
 function sorting(arr, order){
     traceSettings();
     var byName = arr.slice(0);
@@ -203,13 +216,16 @@ function sorting(arr, order){
 
 $("#sort1").on('click', function(){
     titlesSortedOrder = !titlesSortedOrder;
+    sortMethod = !sortMethod;
     sortedByTitle = true;
     saved_items = sorting(saved_items, titlesSortedOrder);
     saveToStorage();
     showLines();
 });
+
 $("#sort2").on('click', function(){
     descriptionSortedOrder = !descriptionSortedOrder;
+    sortMethod = !sortMethod;
     sortedByTitle = false;
     saved_items = sorting(saved_items, descriptionSortedOrder);
     saveToStorage();
